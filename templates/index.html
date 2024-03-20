@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AXIO Prediction System</title>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+        <style>
+              * {
+                font-family: 'Orbitron', sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                font-family: 'Orbitron', sans-serif;
+                background-color:black;
+                background-size: cover;
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                color: beige;
+                text-align: center;
+                margin: 0; /* Reset default margin */
+                padding: 0; /* Reset default padding */
+                height: 100vh; /* Full height */
+                display: flex; /* Use Flexbox */
+                justify-content: center; /* Center horizontally */
+                align-items: center; 
+                font-size: 1.3em; /* Center vertically */
+            }
+    
+            .container {
+                background-color: rgba(255, 255, 255, 0.6);
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                width: auto; /* Adjust based on content */
+            }
+    
+            h1 {
+                color: #333;
+                margin-bottom: 20px;
+            }
+    
+            input[type="file"] {
+                margin: 20px 0;
+            }
+    
+            input[type="submit"] {
+                background-color: #007bff;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+    
+            input[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+    
+            #loading, #downloadLink {
+                display: none;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-weight: bold;
+                margin-top: 20px;
+            }
+    
+            #downloadLink:hover {
+                background-color: #218838;
+            }
+        </style>
+</head>    
+<body>
+    <div class="container">
+        <h1>AXIO Prediction System</h1>
+        <form id="uploadForm" action="/predict" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <input type="submit" value="Upload and Predict" id="uploadPredict"> <!-- Added ID for reference in JS -->
+            <input type="submit" value="Generate Insights" id="generateInsights" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 20px;"> <!-- Made it look similar to the 'Upload and Predict' button -->
+        </form>
+        <div id="loading">Processing...</div>
+        <a id="downloadLink"></a>
+    </div>
+    <script>
+        $(document).ready(function() {
+            var form = $('#uploadForm');
+            form.submit(function(event) {
+                var formData = new FormData(this);
+                var actionUrl = event.originalEvent.submitter.id === "generateInsights" ? '/generate_insights' : '/predict';
+
+                // Show appropriate message based on the button clicked
+                var loadingMessage = actionUrl === '/generate_insights' ? 'Generating insights, please wait...' : 'Processing...';
+                $('#loading').text(loadingMessage).css('display', 'block');
+                $('#downloadLink').hide();
+
+                // If 'Upload and Predict' was clicked, make AJAX call
+                if (actionUrl === '/predict') {
+                    event.preventDefault();
+                    $.ajax({
+                        url: actionUrl,
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            $('#loading').hide();
+                            if (response.url) {
+                                $('#downloadLink').css('display', 'block').attr('href', response.url).text('Download the Ranked CSV');
+                            }
+                        },
+                        error: function() {
+                            $('#loading').hide();
+                            alert('Error processing your file.');
+                        }
+                    });
+                } else {
+                    // If 'Generate Insights' was clicked, no need for AJAX, form will submit normally
+                    form.attr('action', actionUrl);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

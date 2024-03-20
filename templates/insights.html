@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>    
+        <br>
+        <style>
+
+            body {
+                font-family: 'Orbitron', sans-serif;
+                margin: 0;
+                padding: 0;
+                height: 100vh;
+                background-color: black; /* Set the background to black */
+                color: #333; 
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                font-size: 1em;
+            }
+            
+            .container {
+                background-color: rgba(255, 255, 255, 0.6);
+                max-width: 900px; /* Adjust the maximum width as necessary */
+                margin: auto;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                width: auto; /* Adjust based on content */
+
+            }
+            .container {
+                padding: 20px;
+            }
+    
+            h1 {
+                font-size: 3.5em; /* Larger font size for the main heading */
+                color:#333; /* Set the font color to beige */
+                margin-bottom: 0.5em;
+            }
+    
+            p, ul {
+                font-family: 'TimesNewRoman', sans-serif;
+                text-align: justify; /* Justify the text for paragraphs and list items */
+                color: #333; /* Set the font color to beige */
+            }
+
+            ul {
+                list-style-type: disc; /* Add bullet points */
+                list-style-position: inside; /* Keep bullets inside the flow of text */
+                padding-left: 0; /* Remove default padding */
+                margin-left: 1em; /* Add some margin for better alignment */
+            }
+
+            li {
+                text-align: left; /* Align list items to the left */
+                margin-top: 0.5em; /* Add a little space above each list item */
+            }
+        </style>
+    </head>
+    
+<body>
+    <div class="container">
+        <center><h1>AXIO </h1></center>
+        <center> <h2>Insights</h2></center><br>
+        <div> <!-- Use a div to wrap the content for additional styling flexibility -->
+            <!-- Assuming insights are provided as HTML content with <p> and <ul> elements -->
+            <p>{{ insights }} </p><!-- The 'safe' filter allows HTML content with markup -->
+        </div>
+    </div>
+</body>
+</html>
