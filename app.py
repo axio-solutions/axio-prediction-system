@@ -5,7 +5,9 @@ import io
 import os
 from werkzeug.utils import secure_filename
 import openai
+
 app = Flask(__name__)
+
 app.config['UPLOAD_FOLDER'] = 'temp'
 app.config['SECRET_KEY'] = 'your_secret_key'  # Change this to a random secret key
 
