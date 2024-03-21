@@ -49,7 +49,8 @@ def process_file(file_path):
 
 def generate_insights_from_data(data,prompt_text):
     """Generates insights from the DataFrame using OpenAI's GPT."""
-    openai.api_key = "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"
+    openai.api_key = os.getenv('API_KEY')
+    print(openai.api_key)
     summary = data.describe().to_string()
     try:
         response = openai.completions.create(
