@@ -82,53 +82,74 @@
 </head>    
 <body>
     <div class="container">
-        <h1>AXIO Preds System</h1>
-        <form id="uploadForm" action="/predict" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" required>
-            <input type="submit" value="Upload and Predict" id="uploadPredict"> <!-- Added ID for reference in JS -->
-            <input type="submit" value="Generate Insights" id="generateInsights" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 20px;"> <!-- Made it look similar to the 'Upload and Predict' button -->
+        <h1>AXIO Prediction System</h1>
+         <form id="uploadForm" method="post" enctype="multipart/form-data">
+            <center><input type="file" name="file" required></center>
+            <input type="text" name="prompt" id="promptInput" placeholder="Enter your prompt here" style="margin: 10px 0; padding: 5px; width: calc(100% - 20px);">
+            <br>
+            <select id="promptDropdown" style="margin: 10px 0; padding: 5px; width: calc(100% - 20px);">
+                <option value="">Select a prompt</option>
+                <option value="Look into the dataset and give summary in 100 words">Look into the dataset and give summary in 100 words</option>
+                <option value="What are three best cities to buy">What are three best cities to buy</option>
+                <option value="Give me top zip codes that have most properties">Give me top zip codes that have most properties</option>
+                <option value="Can you tell me which zipcodes has good average of buyscore">Can you tell me which zipcodes has good average of buyscore</option>
+                <option value="What is the primary motivation driving clients to sell their property?">What is the primary motivation driving clients to sell their property?</option>
+            </select>
+
+            <input type="submit" value="Upload and Predict" id="uploadPredict">
+            <br>
+            <input type="submit" value="Generate Insights" id="generateInsights">
         </form>
         <div id="loading">Processing...</div>
         <a id="downloadLink"></a>
     </div>
+
     <script>
-        $(document).ready(function() {
-            var form = $('#uploadForm');
-            form.submit(function(event) {
-                var formData = new FormData(this);
-                var actionUrl = event.originalEvent.submitter.id === "generateInsights" ? '/generate_insights' : '/predict';
+    $(document).ready(function() {
+    var form = $('#uploadForm');
+    form.submit(function(event) {
+        var promptInput = $('#promptInput').val();
+        var dropdownValue = $('#promptDropdown').val();
+        
+        // If the prompt textbox is empty but a dropdown value is selected, use the dropdown value as the prompt.
+        if (!promptInput && dropdownValue) {
+            $('#promptInput').val(dropdownValue);
+        }
 
-                // Show appropriate message based on the button clicked
-                var loadingMessage = actionUrl === '/generate_insights' ? 'Generating insights, please wait...' : 'Processing...';
-                $('#loading').text(loadingMessage).css('display', 'block');
-                $('#downloadLink').hide();
+        if (event.originalEvent.submitter.id === "uploadPredict") {
+            // Upload and Predict logic remains the same.
+            event.preventDefault();
+            $('#promptInput').removeAttr('required');
 
-                // If 'Upload and Predict' was clicked, make AJAX call
-                if (actionUrl === '/predict') {
-                    event.preventDefault();
-                    $.ajax({
-                        url: actionUrl,
-                        type: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            $('#loading').hide();
-                            if (response.url) {
-                                $('#downloadLink').css('display', 'block').attr('href', response.url).text('Download the Ranked CSV');
-                            }
-                        },
-                        error: function() {
-                            $('#loading').hide();
-                            alert('Error processing your file.');
-                        }
-                    });
-                } else {
-                    // If 'Generate Insights' was clicked, no need for AJAX, form will submit normally
-                    form.attr('action', actionUrl);
+            var formData = new FormData(this);
+            $('#loading').css('display', 'block');
+            $('#downloadLink').hide();
+
+            $.ajax({
+                url: '/predict',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#loading').hide();
+                    if (response.url) {
+                        $('#downloadLink').css('display', 'block').attr('href', response.url).text('Download the Ranked CSV');
+                    }
+                },
+                error: function() {
+                    $('#loading').hide();
+                    alert('Error processing your file.');
                 }
             });
-        });
-    </script>
+        } else if (event.originalEvent.submitter.id === "generateInsights") {
+            // For 'Generate Insights', prompt input dynamically becomes required if not already filled.
+            $('#promptInput').attr('required', 'required');
+            this.action = '/generate_insights';
+            // Let the form submit normally as the action is already set.
+        }
+    });
+});
+</script>
 </body>
 </html>
