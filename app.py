@@ -63,7 +63,7 @@ def process_file(file_path):
 def generate_insights_from_data(data, prompt_text):
     """Generates insights from the DataFrame using OpenAI's GPT."""
     openai.api_key = os.getenv('API_KEY')
-    if len(data)<1000:
+    if len(data)>1000:
         summary = tabulate(data.describe(), headers='keys', tablefmt='pipe', showindex=True)
     else:
         summary = tabulate(data, headers='keys', tablefmt='pipe', showindex=True)
