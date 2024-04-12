@@ -63,16 +63,16 @@ def process_file(file_path):
 def generate_insights_from_data(data, prompt_text):
     """Generates insights from the DataFrame using OpenAI's GPT."""
     openai.api_key = os.getenv('API_KEY')
-    if len(data)<1000 and len(data)!= 0:
+    if len(data)>1000:
         summary = tabulate(data.describe(), headers='keys', tablefmt='pipe', showindex=True)
-    elif len(data)==0:
-        summary = "there is no data in this case. Just answer the prompt please  "
+    elif len==0:
+        summary = " No data is present. Just answer the"
     else:
         summary = tabulate(data, headers='keys', tablefmt='pipe', showindex=True)
     try:
         response = openai.completions.create(
             model="gpt-3.5-turbo-instruct",
-            prompt=prompt_text + f' Data: \n{summary}',
+            prompt=prompt_text + f' Here is the data: \n{summary}',
             temperature=0.7,
             max_tokens=1000,
             top_p=1.0,
@@ -83,7 +83,7 @@ def generate_insights_from_data(data, prompt_text):
     except Exception as e:
         print(f"Error generating insights: {e}")
         return None
-
+    
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
@@ -123,7 +123,7 @@ def generate_insights():
             return render_template('insights.html', insights=insights)
         else:
             return jsonify({'error': 'Failed to generate insights'}), 500
-    
+
     else:     
         filename = secure_filename(file.filename)
         temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
