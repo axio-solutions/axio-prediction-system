@@ -65,7 +65,7 @@ def generate_insights_from_data(data, prompt_text):
     openai.api_key = os.getenv('API_KEY')
     if len(data)<1000:
         summary = tabulate(data.describe(), headers='keys', tablefmt='pipe', showindex=True)
-    elif:
+    elif len(data)==0:
         summary = "there is no data in this case. Just answer the prompt please  "
     else:
         summary = tabulate(data, headers='keys', tablefmt='pipe', showindex=True)
