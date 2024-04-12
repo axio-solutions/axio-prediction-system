@@ -63,14 +63,16 @@ def process_file(file_path):
 def generate_insights_from_data(data, prompt_text):
     """Generates insights from the DataFrame using OpenAI's GPT."""
     openai.api_key = os.getenv('API_KEY')
-    if len(data)>1000:
+    if len(data)<1000:
         summary = tabulate(data.describe(), headers='keys', tablefmt='pipe', showindex=True)
+    elif:
+        summary = "there is no data in this case. Just answer the prompt please  "
     else:
         summary = tabulate(data, headers='keys', tablefmt='pipe', showindex=True)
     try:
         response = openai.completions.create(
             model="gpt-3.5-turbo-instruct",
-            prompt=prompt_text + f' Here is the data: \n{summary}',
+            prompt=prompt_text + f' Data: \n{summary}',
             temperature=0.7,
             max_tokens=1000,
             top_p=1.0,
@@ -109,35 +111,37 @@ def predict():
     except Exception as e:
         return jsonify({'error': 'Processing failed'}), 500
 
-@app.route('/generate_insights', methods=['POST'])
+@app.route('/generate_insights', methods=['GET','POST'])
 def generate_insights():
-    
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-
     file = request.files['file']
     prompt = request.form.get('prompt')  # Extracting the prompt text from the form
-
+    print(file)
     if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+        data=pd.DataFrame()
+        insights = generate_insights_from_data(data, prompt)
+        if insights:
+            return render_template('insights.html', insights=insights)
+        else:
+            return jsonify({'error': 'Failed to generate insights'}), 500
     
-    filename = secure_filename(file.filename)
-    temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(temp_path)
-    file_extension = filename.split('.')[-1].lower()
+    else:     
+        filename = secure_filename(file.filename)
+        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(temp_path)
+        file_extension = filename.split('.')[-1].lower()
 
-    if file_extension in ['xls', 'xlsx']:
-        data = pd.read_excel(temp_path)
-    elif file_extension == 'csv':
-        data = pd.read_csv(temp_path)
-    else:
-        return jsonify({'error': 'Unsupported file format'}), 400
+        if file_extension in ['xls', 'xlsx']:
+            data = pd.read_excel(temp_path)
+        elif file_extension == 'csv':
+            data = pd.read_csv(temp_path)
+        else:
+            return jsonify({'error': 'Unsupported file format'}), 400
 
-    insights = generate_insights_from_data(data, prompt)
-    if insights:
-        return render_template('insights.html', insights=insights)
-    else:
-        return jsonify({'error': 'Failed to generate insights'}), 500
+        insights = generate_insights_from_data(data, prompt)
+        if insights:
+            return render_template('insights.html', insights=insights)
+        else:
+            return jsonify({'error': 'Failed to generate insights'}), 500
 
 @app.route('/download/<filename>')
 def download_file(filename):

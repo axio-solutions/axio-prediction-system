@@ -1,93 +1,78 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>AXIO Predictions System</title>
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    
-        <style>
-              * {
-                font-family: 'Orbitron', sans-serif;
-                margin: 0;
-                padding: 0;
-            }
-            body {
-                font-family: 'Orbitron', sans-serif;
-                background-color:black;
-                background-size: cover;
-                background-position: center center;
-                background-repeat: no-repeat;
-                background-attachment: fixed;
-                color: beige;
-                text-align: center;
-                margin: 0; /* Reset default margin */
-                padding: 0; /* Reset default padding */
-                height: 100vh; /* Full height */
-                display: flex; /* Use Flexbox */
-                justify-content: center; /* Center horizontally */
-                align-items: center; 
-                font-size: 1.3em; /* Center vertically */
-            }
-    
-            .container {
-                background-color: rgba(255, 255, 255, 0.6);
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                width: auto; /* Adjust based on content */
-            }
-    
-            h1 {
-                color: #333;
-                margin-bottom: 20px;
-            }
-    
-            input[type="file"] {
-                margin: 20px 0;
-            }
-    
-            input[type="submit"] {
-                background-color: #007bff;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                cursor: pointer;
-                font-weight: bold;
-                margin-bottom: 20px;
-            }
-    
-            input[type="submit"]:hover {
-                background-color: #0056b3;
-            }
-    
-            #loading, #downloadLink {
-                display: none;
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                text-decoration: none;
-                font-weight: bold;
-                margin-top: 20px;
-            }
-    
-            #downloadLink:hover {
-                background-color: #218838;
-            }
-        </style>
+<head>
+    <title>AXIO Predictions System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <style>
+        * {
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: black;
+            color: beige;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3em;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input[type="file"], input[type="text"], select {
+            margin: 10px 0;
+            padding: 5px;
+            width: calc(100% - 20px);
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #loading, #downloadLink {
+            display: none;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #downloadLink:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>    
 <body>
     <div class="container">
         <h1>AXIO Prediction System</h1>
-         <form id="uploadForm" method="post" enctype="multipart/form-data">
-            <center><input type="file" name="file" required></center>
-            <input type="text" name="prompt" id="promptInput" placeholder="Enter your prompt here" style="margin: 10px 0; padding: 5px; width: calc(100% - 20px);">
+        <form id="uploadForm" method="post" enctype="multipart/form-data">
+            <center><input type="file" name="file" id="fileInput"></center>
+            <input type="text" name="prompt" id="promptInput" placeholder="Enter your prompt here">
             <br>
-            <select id="promptDropdown" style="margin: 10px 0; padding: 5px; width: calc(100% - 20px);">
+            <select id="promptDropdown">
                 <option value="">Select a prompt</option>
                 <option value="Look into the dataset and give summary in 100 words">Look into the dataset and give summary in 100 words</option>
                 <option value="What are three best cities to buy">What are three best cities to buy</option>
@@ -106,50 +91,51 @@
 
     <script>
     $(document).ready(function() {
-    var form = $('#uploadForm');
-    form.submit(function(event) {
-        var promptInput = $('#promptInput').val();
-        var dropdownValue = $('#promptDropdown').val();
-        
-        // If the prompt textbox is empty but a dropdown value is selected, use the dropdown value as the prompt.
-        if (!promptInput && dropdownValue) {
-            $('#promptInput').val(dropdownValue);
-        }
-
-        if (event.originalEvent.submitter.id === "uploadPredict") {
-            // Upload and Predict logic remains the same.
+        var form = $('#uploadForm');
+        form.submit(function(event) {
             event.preventDefault();
-            $('#promptInput').removeAttr('required');
+            var promptInput = $('#promptInput').val();
+            var dropdownValue = $('#promptDropdown').val();
+            var fileInput = $('#fileInput');
 
-            var formData = new FormData(this);
-            $('#loading').css('display', 'block');
-            $('#downloadLink').hide();
+            // Use the dropdown value as the prompt if the prompt input is empty.
+            if (!promptInput && dropdownValue) {
+                $('#promptInput').val(dropdownValue);
+            }
 
-            $.ajax({
-                url: '/predict',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    $('#loading').hide();
-                    if (response.url) {
-                        $('#downloadLink').css('display', 'block').attr('href', response.url).text('Download the Ranked CSV');
+            // Setting action based on button pressed
+            if (event.originalEvent.submitter.id === "uploadPredict") {
+                this.action = '/predict';
+                fileInput.prop('required', true); // Require file for Upload and Predict
+
+                var formData = new FormData(this);
+                $('#loading').css('display', 'block');
+                $('#downloadLink').hide();
+
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        $('#loading').hide();
+                        if (response.url) {
+                            $('#downloadLink').css('display', 'block').attr('href', response.url).text('Download the Ranked CSV');
+                        }
+                    },
+                    error: function() {
+                        $('#loading').hide();
+                        alert('Error processing your file.');
                     }
-                },
-                error: function() {
-                    $('#loading').hide();
-                    alert('Error processing your file.');
-                }
-            });
-        } else if (event.originalEvent.submitter.id === "generateInsights") {
-            // For 'Generate Insights', prompt input dynamically becomes required if not already filled.
-            $('#promptInput').attr('required', 'required');
-            this.action = '/generate_insights';
-            // Let the form submit normally as the action is already set.
-        }
+                });
+            } else if (event.originalEvent.submitter.id === "generateInsights") {
+                fileInput.prop('required', false); // Do not require file for Generate Insights
+                this.action = '/generate_insights';
+                this.submit(); // Continue with the form submission as normal
+            }
+        });
     });
-});
-</script>
+    </script>
 </body>
 </html>
