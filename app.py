@@ -113,12 +113,12 @@ def predict():
 
 @app.route('/generate_insights', methods=['POST'])
 def generate_insights():
-    prompt = request.form.get('prompt')
-    # Check if there is a file path stored in the session
-    if 'file_path' in session:
-        temp_path = session['file_path']
-        print(temp_path)
-        file_extension = temp_path.split('.')[-1].lower()
+    if 'file' in request.files and request.files['file'].filename:
+        file = request.files['file']
+        filename = secure_filename(file.filename)
+        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(temp_path)
+        file_extension = filename.split('.')[-1].lower()
 
         if file_extension in ['xls', 'xlsx']:
             data = pd.read_excel(temp_path)
@@ -127,15 +127,9 @@ def generate_insights():
         else:
             return jsonify({'error': 'Unsupported file format'}), 400
     else:
-        try:            
-            if file_extension in ['xls', 'xlsx']:
-                data = pd.read_excel(session['file_path'])
-            elif file_extension == 'csv':
-                data = pd.read_csv(temp_path)
-            else:
-                return jsonify({'error': 'Unsupported file format'}), 400 # Create an empty DataFrame or load a default
-        except:
-            data = pd.DataFrame()
+        data = pd.DataFrame()  # Create an empty DataFrame or load a default
+
+    prompt = request.form.get('prompt')
     insights = generate_insights_from_data(data, prompt)
     if insights:
         return render_template('insights.html', insights=insights)
