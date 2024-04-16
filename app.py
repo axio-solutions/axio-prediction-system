@@ -72,7 +72,7 @@ def generate_insights_from_data(data, prompt_text):
     try:
         response = openai.completions.create(
             model="gpt-3.5-turbo-instruct",
-            prompt=prompt_text + f' Here is the data: \n{summary}',
+            prompt=prompt_text + f' Here is the data: \n{summary} \n write in less than 70 words',
             temperature=0.7,
             max_tokens=1000,
             top_p=1.0,
