@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, render_template, jsonify, url_for
+from flask import Flask, request, send_file, render_template, jsonify, url_for,session
 import pandas as pd
 import pickle
 import io
@@ -111,24 +111,14 @@ def predict():
     except Exception as e:
         return jsonify({'error': 'Processing failed'}), 500
 
-@app.route('/generate_insights', methods=['GET','POST'])
+@app.route('/generate_insights', methods=['POST'])
 def generate_insights():
-    file = request.files['file']
-    prompt = request.form.get('prompt')  # Extracting the prompt text from the form
-    print(file)
-    if file.filename == '':
-        data=pd.DataFrame()
-        insights = generate_insights_from_data(data, prompt)
-        if insights:
-            return render_template('insights.html', insights=insights)
-        else:
-            return jsonify({'error': 'Failed to generate insights'}), 500
-
-    else:     
-        filename = secure_filename(file.filename)
-        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(temp_path)
-        file_extension = filename.split('.')[-1].lower()
+    prompt = request.form.get('prompt')
+    # Check if there is a file path stored in the session
+    if 'file_path' in session:
+        temp_path = session['file_path']
+        print(temp_path)
+        file_extension = temp_path.split('.')[-1].lower()
 
         if file_extension in ['xls', 'xlsx']:
             data = pd.read_excel(temp_path)
@@ -136,12 +126,21 @@ def generate_insights():
             data = pd.read_csv(temp_path)
         else:
             return jsonify({'error': 'Unsupported file format'}), 400
-
-        insights = generate_insights_from_data(data, prompt)
-        if insights:
-            return render_template('insights.html', insights=insights)
-        else:
-            return jsonify({'error': 'Failed to generate insights'}), 500
+    else:
+        try:            
+            if file_extension in ['xls', 'xlsx']:
+                data = pd.read_excel(session['file_path'])
+            elif file_extension == 'csv':
+                data = pd.read_csv(temp_path)
+            else:
+                return jsonify({'error': 'Unsupported file format'}), 400 # Create an empty DataFrame or load a default
+        except:
+            data = pd.DataFrame()
+    insights = generate_insights_from_data(data, prompt)
+    if insights:
+        return render_template('insights.html', insights=insights)
+    else:
+        return jsonify({'error': 'Failed to generate insights'}), 500
 
 @app.route('/download/<filename>')
 def download_file(filename):

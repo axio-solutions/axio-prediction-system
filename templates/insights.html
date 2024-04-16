@@ -1,75 +1,110 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>    
-        <br>
-        <style>
+<head>
+    <title>AXIO Insights System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-            body {
-                font-family: 'Orbitron', sans-serif;
-                margin: 0;
-                padding: 0;
-                height: 100vh;
-                background-color: black; /* Set the background to black */
-                color: #333; 
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                font-size: 1em;
-            }
-            
-            .container {
-                background-color: rgba(255, 255, 255, 0.6);
-                max-width: 900px; /* Adjust the maximum width as necessary */
-                margin: auto;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                width: auto; /* Adjust based on content */
-
-            }
-            .container {
-                padding: 20px;
-            }
-    
-            h1 {
-                font-size: 3.5em; /* Larger font size for the main heading */
-                color:#333; /* Set the font color to beige */
-                margin-bottom: 0.5em;
-            }
-    
-            p, ul {
-                font-family: 'TimesNewRoman', sans-serif;
-                text-align: justify; /* Justify the text for paragraphs and list items */
-                color: #333; /* Set the font color to beige */
-            }
-
-            ul {
-                list-style-type: disc; /* Add bullet points */
-                list-style-position: inside; /* Keep bullets inside the flow of text */
-                padding-left: 0; /* Remove default padding */
-                margin-left: 1em; /* Add some margin for better alignment */
-            }
-
-            li {
-                text-align: left; /* Align list items to the left */
-                margin-top: 0.5em; /* Add a little space above each list item */
-            }
-        </style>
-    </head>
-    
+    <style>
+        * {
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: black;
+            color: black;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3em;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input[type="file"], input[type="text"], select {
+            margin: 10px 0;
+            padding: 5px;
+            width: calc(100% - 20px);
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #loading, #downloadLink {
+            display: none;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #downloadLink:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
 <body>
     <div class="container">
-        <center><h1>AXIO </h1></center>
-        <center> <h2>Insights</h2></center><br>
-        <div> <!-- Use a div to wrap the content for additional styling flexibility -->
-            <!-- Assuming insights are provided as HTML content with <p> and <ul> elements -->
-            <p>{{ insights }} </p><!-- The 'safe' filter allows HTML content with markup -->
-        </div>
+        <h1>AXIO Insights</h1>
+        <div>{{ insights }}</div>
+        <form id="insightsForm" method="post" action="/generate_insights">
+            <input type="text" name="prompt" id="promptInput" placeholder="Enter your prompt here">
+            <br>
+            <select id="promptDropdown">
+                <option value="">Select a prompt</option>
+                <option value="Look into the dataset and give summary in 100 words">Look into the dataset and give summary in 100 words</option>
+                <option value="What are three best cities to buy">What are three best cities to buy</option>
+                <option value="Give me top zip codes that have most properties">Give me top zip codes that have most properties</option>
+                <option value="Can you tell me which zipcodes has good average of buyscore">Can you tell me which zipcodes has good average of buyscore</option>
+                <option value="What is the primary motivation driving clients to sell their property?">What is the primary motivation driving clients to sell their property?</option>
+            </select>
+            <input type="submit" value="Generate Insights">
+        </form>
     </div>
+    <script>
+        $(document).ready(function() {
+            $('#insightsForm').submit(function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                var formData = $(this).serialize(); // Serialize the form data
+    
+                // AJAX POST request to the Flask endpoint
+                $.ajax({
+                    url: '/generate_insights', // Confirm this is the correct Flask route
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        // Assuming the Flask route returns the updated insights as HTML
+                        $('.container').html(response); // Replace the content of the container div with the response
+                    },
+                    error: function(xhr, status, errorThrown) {
+                        alert('Error: ' + errorThrown); // Corrected to use errorThrown for the error message
+                    }
+                });
+            });
+        });
+    </script>
+    
 </body>
 </html>
